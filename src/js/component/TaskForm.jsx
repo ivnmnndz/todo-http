@@ -4,7 +4,7 @@ import { GlobalContext } from "../context/GlobalState.js";
 export const TaskForm = () => {
 	const [content, setContent] = useState("");
 
-	const { addTask } = useContext(GlobalContext);
+	const { tasks, addTask, editTodos, getTodos } = useContext(GlobalContext);
 
 	const newID = Math.floor(Math.random() * 10000000);
 
@@ -12,11 +12,11 @@ export const TaskForm = () => {
 		event.preventDefault();
 		const newTask = {
 			id: newID,
-			text: content.trim(),
-			completed: false,
-			created: new Date().toLocaleDateString("en-US")
+			label: content.trim(),
+			done: false
 		};
 		addTask(newTask);
+		editTodos();
 		setContent("");
 	};
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useContext } from "react";
-import { getTodos } from "../api/getTodos.js";
 import { GlobalContext } from "../context/GlobalState.js";
 import { Task } from "./Task.jsx";
 

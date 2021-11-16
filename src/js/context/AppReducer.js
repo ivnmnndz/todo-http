@@ -2,7 +2,14 @@ export default (state, action) => {
 	switch (action.type) {
 		case "GET_LIST":
 			return {
+				...state,
 				tasks: action.payload
+			};
+
+		case "ADD_USER":
+			return {
+				...state,
+				userName: action.payload
 			};
 
 		case "ADD_TASK":
