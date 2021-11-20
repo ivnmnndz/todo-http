@@ -12,6 +12,12 @@ export default (state, action) => {
 				userName: action.payload
 			};
 
+		case "DELETE_USER":
+			return {
+				...state,
+				userName: ""
+			};
+
 		case "ADD_TASK":
 			return {
 				...state,

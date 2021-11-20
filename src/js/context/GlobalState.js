@@ -16,42 +16,84 @@ export const GlobalProvider = ({ children }) => {
 	//create useReducer state
 	const [state, dispatch] = useReducer(AppReducer, initialState);
 	// define actions
+	function addUser(userName) {
+		postUser(userName)
+			.then(() => {
+				dispatch({
+					type: "ADD_USER",
+					payload: userName
+				});
+			})
+			.catch(err => {
+				console.error("error", err);
+			});
+	}
+
+	function removeUser(userName) {
+		deleteUser(state.userName).then(() => {
+			dispatch({
+				type: "DELETE_USER",
+				payload: userName
+			});
+		});
+	}
+
 	function getList(tasks) {
 		dispatch({
 			type: "GET_LIST",
 			payload: tasks
 		});
 	}
-	function addUser(userName) {
-		dispatch({
-			type: "ADD_USER",
-			payload: userName
-		});
-	}
 
 	function addTask(task) {
-		dispatch({
-			type: "ADD_TASK",
-			payload: task
+		editTodos([...state.tasks, task]).then(() => {
+			dispatch({
+				type: "ADD_TASK",
+				payload: task
+			});
 		});
 	}
 
 	function deleteTask(id) {
-		dispatch({
-			type: "DELETE_TASK",
-			payload: id
-		});
+		editTodos(state.tasks.filter(task => task.id !== id))
+			.then(() => {
+				dispatch({
+					type: "DELETE_TASK",
+					payload: id
+				});
+			})
+			.catch(err => {
+				//catch errors
+				console.error("error", err);
+			});
 	}
 
 	function completeTask(id) {
-		dispatch({
-			type: "COMPLETE_TASK",
-			payload: id
+		editTodos(
+			state.tasks.map(item => {
+				if (item.id === id) {
+					return {
+						...item,
+						done: true
+					};
+				} else {
+					return item;
+				}
+			})
+		).then(() => {
+			dispatch({
+				type: "COMPLETE_TASK",
+				payload: id
+			});
 		});
 	}
+
 	// api calls
-	const getTodos = () => {
-		fetch(`https://assets.breatheco.de/apis/fake/todos/user/iiii`)
+	const getTodos = userName => {
+		debugger;
+		return fetch(
+			`https://assets.breatheco.de/apis/fake/todos/user/${userName}`
+		)
 			.then(resp => {
 				// if response is not ok print an error
 				if (!resp.ok) {
@@ -72,12 +114,32 @@ export const GlobalProvider = ({ children }) => {
 			});
 	};
 
-	const postUser = () => {
-		fetch(
+	const editTodos = tasks => {
+		return fetch(
 			`https://assets.breatheco.de/apis/fake/todos/user/${state.userName}`,
 			{
+				method: "PUT",
+				body: JSON.stringify(tasks),
+				headers: {
+					"Content-Type": "application/json"
+				}
+			}
+		).then(resp => {
+			// if response is not ok print an error
+			if (!resp.ok) {
+				throw new Error("response not ok");
+			}
+			console.log(resp);
+			// or return a promise
+			return resp.json();
+		});
+	};
+	const postUser = userName => {
+		return fetch(
+			`https://assets.breatheco.de/apis/fake/todos/user/${userName}`,
+			{
 				method: "POST",
-				body: [],
+				body: JSON.stringify([]),
 				headers: {
 					"Content-Type": "application/json"
 				}
@@ -86,40 +148,10 @@ export const GlobalProvider = ({ children }) => {
 			.then(resp => {
 				// if response is not ok print an error
 				if (!resp.ok) {
-					console.log("response not ok");
+					console.log("response not ok", resp);
 				}
 				// or return a promise
 				return resp.json();
-			})
-			.then(data => {
-				// set state to fetched data
-				console.log(data);
-			})
-			.catch(err => {
-				//catch errors
-				console.log("error");
-			});
-	};
-	const editTodos = () => {
-		console.log(state.tasks);
-		fetch(`https://assets.breatheco.de/apis/fake/todos/user/iiii`, {
-			method: "PUT",
-			body: JSON.stringify(state.tasks),
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-			.then(resp => {
-				// if response is not ok print an error
-				if (!resp.ok) {
-					console.log("response not ok");
-				}
-				// or return a promise
-				return resp.json();
-			})
-			.then(data => {
-				// set state to fetched data
-				console.log(data);
 			})
 			.catch(err => {
 				//catch errors
@@ -127,9 +159,17 @@ export const GlobalProvider = ({ children }) => {
 			});
 	};
 
-	useEffect(() => {
-		state.userName ? getTodos() : null;
-	}, []);
+	const deleteUser = userName => {
+		return fetch(
+			`https://assets.breatheco.de/apis/fake/todos/user/${userName}`,
+			{
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				}
+			}
+		);
+	};
 
 	return (
 		<GlobalContext.Provider
@@ -141,7 +181,8 @@ export const GlobalProvider = ({ children }) => {
 				completeTask,
 				getTodos,
 				editTodos,
-				postUser
+				addUser,
+				removeUser
 			}}>
 			{children}
 		</GlobalContext.Provider>

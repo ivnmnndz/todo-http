@@ -7,11 +7,9 @@ export const Task = ({ task }) => {
 
 	const handleComplete = () => {
 		completeTask(task.id);
-		editTodos();
 	};
 	const handleDelete = () => {
 		deleteTask(task.id);
-		editTodos();
 	};
 
 	return (

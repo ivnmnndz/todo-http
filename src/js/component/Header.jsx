@@ -2,17 +2,24 @@ import React, { useContext, useRef } from "react";
 import { GlobalContext } from "../context/GlobalState";
 
 export const Header = () => {
-	const { userName, postUser, addUser } = useContext(GlobalContext);
+	const { userName, addUser, removeUser } = useContext(GlobalContext);
+
 	const userNameRef = useRef();
-	const handleUserSubmit = e => {
+
+	const handleAddUser = e => {
 		e.preventDefault();
 		addUser(userNameRef.current.value);
-		postUser();
 	};
+
+	const handleRemoveUser = e => {
+		e.preventDefault();
+		removeUser(userName);
+	};
+
 	return (
 		<>
 			{!userName ? (
-				<form onSubmit={handleUserSubmit}>
+				<form onSubmit={handleAddUser}>
 					<input
 						ref={userNameRef}
 						type="text"
@@ -20,9 +27,14 @@ export const Header = () => {
 					/>
 				</form>
 			) : (
-				<header>
-					<h2>Ivan&apos;s To-Do List</h2>
-				</header>
+				<>
+					<header>
+						<h2>{userName}&apos;s To-Do List</h2>
+					</header>
+					<div>
+						<button onClick={handleRemoveUser}>delete user</button>
+					</div>
+				</>
 			)}
 		</>
 	);
